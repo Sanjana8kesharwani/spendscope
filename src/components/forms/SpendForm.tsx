@@ -9,6 +9,8 @@ import {
 import { generateSummary } from "@/lib/generateSummary";
 import AuditResult from "@/components/audit/AuditResult";
 import SavingsHero from "@/components/audit/SavingsHero";
+import { supabase } from "@/lib/supabase";
+
 
 const tools = [
   "ChatGPT",
@@ -95,7 +97,7 @@ export default function SpendForm() {
   };
 
   // Generate Audit
-  const handleGenerateAudit = () => {
+  const handleGenerateAudit = async () => {
     const incompleteTool = toolsData.some(
       (item) => !item.tool || !item.plan
     );
@@ -133,7 +135,18 @@ export default function SpendForm() {
     const generatedSummary =
       generateSummary(results);
 
-    setSummary(generatedSummary);
+    try {
+  await supabase.from("audits").insert({
+    tools: toolsData,
+    summary: generatedSummary,
+    monthly_savings: totalMonthlySavings,
+    yearly_savings: totalYearlySavings,
+  });
+
+  console.log("Audit saved successfully");
+} catch (error) {
+  console.log("Supabase save error", error);
+}
   };
 
   // Total Savings
