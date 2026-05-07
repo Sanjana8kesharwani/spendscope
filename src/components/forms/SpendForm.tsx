@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { pricingData } from "@/data/pricingData";
+import {
+  generateAudit,
+  AuditResult as AuditResultType,
+} from "@/lib/auditEngine";
+import AuditResult from "@/components/audit/AuditResult";
 
 const tools = [
   "ChatGPT",
@@ -14,14 +19,31 @@ const tools = [
 export default function SpendForm() {
   const [selectedTool, setSelectedTool] = useState("");
   const [selectedPlan, setSelectedPlan] = useState("");
+  const [teamSize, setTeamSize] = useState(1);
+
+  const [auditResult, setAuditResult] =
+    useState<AuditResultType | null>(null);
 
   const currentPrice =
-  selectedTool && selectedPlan
-    ? (
-        pricingData[selectedTool as keyof typeof pricingData]
-          .plans as Record<string, number>
-      )[selectedPlan]
-    : "";
+    selectedTool && selectedPlan
+      ? (
+          pricingData[selectedTool as keyof typeof pricingData]
+            .plans as Record<string, number>
+        )[selectedPlan]
+      : "";
+
+  const handleGenerateAudit = () => {
+    if (!selectedTool || !selectedPlan) return;
+
+    const result = generateAudit({
+      tool: selectedTool,
+      plan: selectedPlan,
+      teamSize,
+      currentSpend: Number(currentPrice),
+    });
+
+    setAuditResult(result);
+  };
 
   return (
     <section className="py-20">
@@ -122,16 +144,26 @@ export default function SpendForm() {
 
               <input
                 type="number"
-                placeholder="5"
+                value={teamSize}
+                onChange={(e) =>
+                  setTeamSize(Number(e.target.value))
+                }
                 className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
               />
             </div>
           </div>
 
-          <button className="mt-8 w-full bg-white text-black py-3 rounded-xl font-semibold hover:bg-gray-200 transition">
+          <button
+            onClick={handleGenerateAudit}
+            className="mt-8 w-full bg-white text-black py-3 rounded-xl font-semibold hover:bg-gray-200 transition"
+          >
             Generate Audit
           </button>
         </div>
+
+        {auditResult && (
+          <AuditResult result={auditResult} />
+        )}
       </div>
     </section>
   );
