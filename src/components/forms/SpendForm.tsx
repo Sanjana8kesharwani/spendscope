@@ -137,16 +137,13 @@ export default function SpendForm() {
                   : "";
 
               return (
-                <div
-                  key={item.id}
-                  className="border border-white/10 rounded-2xl p-6"
-                >
+                <div key={item.id} className="border border-white/10 rounded-2xl p-6">
                   <h3 className="text-xl font-semibold mb-6 text-white">
                     Tool #{index + 1}
                   </h3>
 
                   <div className="grid md:grid-cols-2 gap-6">
-                    {/* AI Tool */}
+                   
                     <div>
                       <label className="text-sm text-gray-300">
                         AI Tool
@@ -164,8 +161,7 @@ export default function SpendForm() {
 
                           setToolsData(updated);
                         }}
-                        className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
-                      >
+                        className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3">
                         <option value="">
                           Select Tool
                         </option>
@@ -187,12 +183,8 @@ export default function SpendForm() {
                         Monthly Spend ($)
                       </label>
 
-                      <input
-                        type="number"
-                        value={currentPrice}
-                        readOnly
-                        className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
-                      />
+                      <input type="number" value={currentPrice} readOnly
+                      className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"/>
                     </div>
 
                     {/* Plan */}
