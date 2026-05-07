@@ -9,14 +9,7 @@ import {
 import AuditResult from "@/components/audit/AuditResult";
 import SavingsHero from "@/components/audit/SavingsHero";
 
-const tools = [
-  "ChatGPT",
-  "Claude",
-  "Cursor",
-  "GitHub Copilot",
-  "Gemini",
-];
-
+const tools = ["ChatGPT", "Claude", "Cursor", "GitHub Copilot", "Gemini"];
 
 interface ToolData {
   id: number;
@@ -31,8 +24,7 @@ export default function SpendForm() {
   // Persistent Tools State
   const [toolsData, setToolsData] = useState<ToolData[]>(() => {
     if (typeof window !== "undefined") {
-      const savedData =
-        localStorage.getItem("audit-tools");
+      const savedData = localStorage.getItem("audit-tools");
 
       if (savedData) {
         return JSON.parse(savedData);
@@ -53,15 +45,13 @@ export default function SpendForm() {
 
   // Save to localStorage
   useEffect(() => {
-    localStorage.setItem(
-      "audit-tools",
-      JSON.stringify(toolsData)
-    );
+    localStorage.setItem("audit-tools", JSON.stringify(toolsData));
   }, [toolsData]);
 
   // Audit Results
-  const [auditResults, setAuditResults] =
-    useState<AuditResultType[]>([]);
+  const [auditResults, setAuditResults] = useState<AuditResultType[]>([]);
+
+  const [error, setError] = useState("");
 
   // Add another tool
   const addTool = () => {
@@ -80,14 +70,27 @@ export default function SpendForm() {
 
   // Generate Audit
   const handleGenerateAudit = () => {
+    const incompleteTool = toolsData.some((item) => !item.tool || !item.plan);
+
+    if (incompleteTool) {
+      setError(
+        "Please complete all tool selections before generating an audit.",
+      );
+
+      return;
+    }
+
+    setError("");
+
     const results = toolsData
       .filter((item) => item.tool && item.plan)
       .map((item) => {
         const currentPrice =
           (
-            pricingData[
-              item.tool as keyof typeof pricingData
-            ].plans as Record<string, number>
+            pricingData[item.tool as keyof typeof pricingData].plans as Record<
+              string,
+              number
+            >
           )[item.plan] || 0;
 
         return generateAudit({
@@ -104,12 +107,12 @@ export default function SpendForm() {
   // Total Savings
   const totalMonthlySavings = auditResults.reduce(
     (sum, item) => sum + item.monthlySavings,
-    0
+    0,
   );
 
   const totalYearlySavings = auditResults.reduce(
     (sum, item) => sum + item.yearlySavings,
-    0
+    0,
   );
 
   return (
@@ -130,47 +133,58 @@ export default function SpendForm() {
               const currentPrice =
                 item.tool && item.plan
                   ? (
-                      pricingData[
-                        item.tool as keyof typeof pricingData
-                      ].plans as Record<string, number>
+                      pricingData[item.tool as keyof typeof pricingData]
+                        .plans as Record<string, number>
                     )[item.plan]
                   : "";
 
               return (
-                <div key={item.id} className="border border-white/10 rounded-2xl p-6">
-                  <h3 className="text-xl font-semibold mb-6 text-white">
-                    Tool #{index + 1}
-                  </h3>
+                <div
+                  key={item.id}
+                  className="border border-white/10 rounded-2xl p-6"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold text-white">
+                      Tool #{index + 1}
+                    </h3>
+
+                    {toolsData.length > 1 && (
+                      <button
+                        onClick={() => {
+                          const updated = toolsData.filter(
+                            (_, i) => i !== index,
+                          );
+
+                          setToolsData(updated);
+                        }}
+                        className="text-red-400 text-sm hover:text-red-300"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
-                   
                     <div>
-                      <label className="text-sm text-gray-300">
-                        AI Tool
-                      </label>
+                      <label className="text-sm text-gray-300">AI Tool</label>
 
                       <select
                         value={item.tool}
                         onChange={(e) => {
                           const updated = [...toolsData];
 
-                          updated[index].tool =
-                            e.target.value;
+                          updated[index].tool = e.target.value;
 
                           updated[index].plan = "";
 
                           setToolsData(updated);
                         }}
-                        className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3">
-                        <option value="">
-                          Select Tool
-                        </option>
+                        className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
+                      >
+                        <option value="">Select Tool</option>
 
                         {tools.map((tool) => (
-                          <option
-                            key={tool}
-                            value={tool}
-                          >
+                          <option key={tool} value={tool}>
                             {tool}
                           </option>
                         ))}
@@ -183,42 +197,37 @@ export default function SpendForm() {
                         Monthly Spend ($)
                       </label>
 
-                      <input type="number" value={currentPrice} readOnly
-                      className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"/>
+                      <input
+                        type="number"
+                        value={currentPrice}
+                        readOnly
+                        className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
+                      />
                     </div>
 
                     {/* Plan */}
                     <div>
-                      <label className="text-sm text-gray-300">
-                        Plan
-                      </label>
+                      <label className="text-sm text-gray-300">Plan</label>
 
                       <select
                         value={item.plan}
                         onChange={(e) => {
                           const updated = [...toolsData];
 
-                          updated[index].plan =
-                            e.target.value;
+                          updated[index].plan = e.target.value;
 
                           setToolsData(updated);
                         }}
                         className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
                       >
-                        <option value="">
-                          Select Plan
-                        </option>
+                        <option value="">Select Plan</option>
 
                         {item.tool &&
                           Object.keys(
-                            pricingData[
-                              item.tool as keyof typeof pricingData
-                            ].plans
+                            pricingData[item.tool as keyof typeof pricingData]
+                              .plans,
                           ).map((plan) => (
-                            <option
-                              key={plan}
-                              value={plan}
-                            >
+                            <option key={plan} value={plan}>
                               {plan}
                             </option>
                           ))}
@@ -236,8 +245,7 @@ export default function SpendForm() {
                         onChange={(e) => {
                           const updated = [...toolsData];
 
-                          updated[index].useCase =
-                            e.target.value;
+                          updated[index].useCase = e.target.value;
 
                           setToolsData(updated);
                         }}
@@ -253,9 +261,7 @@ export default function SpendForm() {
 
                     {/* Team Size */}
                     <div className="md:col-span-2">
-                      <label className="text-sm text-gray-300">
-                        Team Size
-                      </label>
+                      <label className="text-sm text-gray-300">Team Size</label>
 
                       <input
                         type="number"
@@ -263,8 +269,7 @@ export default function SpendForm() {
                         onChange={(e) => {
                           const updated = [...toolsData];
 
-                          updated[index].teamSize =
-                            Number(e.target.value);
+                          updated[index].teamSize = Number(e.target.value);
 
                           setToolsData(updated);
                         }}
@@ -284,6 +289,12 @@ export default function SpendForm() {
           >
             + Add Another Tool
           </button>
+
+          {error && (
+            <div className="mt-6 bg-red-500/10 border border-red-500/20 text-red-300 rounded-xl p-4 text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Generate Audit */}
           <button
@@ -306,10 +317,7 @@ export default function SpendForm() {
         {auditResults.length > 0 && (
           <div className="space-y-6 mt-6">
             {auditResults.map((result, index) => (
-              <AuditResult
-                key={index}
-                result={result}
-              />
+              <AuditResult key={index} result={result} />
             ))}
           </div>
         )}
