@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { pricingData } from "@/data/pricingData";
 import {
   generateAudit,
   AuditResult as AuditResultType,
 } from "@/lib/auditEngine";
+
 import { generateSummary } from "@/lib/generateSummary";
+
 import AuditResult from "@/components/audit/AuditResult";
 import SavingsHero from "@/components/audit/SavingsHero";
+
 import { supabase } from "@/lib/supabase";
 
 const tools = [
@@ -29,6 +34,8 @@ interface ToolData {
 }
 
 export default function SpendForm() {
+  const router = useRouter();
+
   // Hydration-safe state
   const [hydrated, setHydrated] =
     useState(false);
@@ -178,7 +185,9 @@ export default function SpendForm() {
         "Audit saved successfully"
       );
 
-      window.location.href = `/audit/${data.id}`;
+      router.push(
+        `/audit/${data.id}`
+      );
     } catch (error) {
       console.log(
         "Unexpected error",

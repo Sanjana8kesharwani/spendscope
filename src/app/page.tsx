@@ -1,8 +1,39 @@
+"use client";
+
+import { useEffect } from "react";
+
 import Navbar from "@/components/shared/Navbar";
 import Features from "@/components/shared/Features";
 import SpendForm from "@/components/forms/SpendForm";
 
 export default function Home() {
+  const scrollToForm = () => {
+    const section =
+      document.getElementById("audit-form");
+
+    section?.scrollIntoView({
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      scrollToForm();
+    };
+
+    window.addEventListener(
+      "scroll-to-form",
+      handleScroll
+    );
+
+    return () => {
+      window.removeEventListener(
+        "scroll-to-form",
+        handleScroll
+      );
+    };
+  }, []);
+
   return (
     <main className="min-h-screen bg-black text-white">
       <Navbar />
@@ -16,18 +47,19 @@ export default function Home() {
           Audit your AI stack instantly and discover hidden monthly savings.
         </p>
 
-        <a href="#audit-form">
-  <button className="mt-8 bg-white text-black px-6 py-3 rounded-xl font-semibold">
-    Start Free Audit
-  </button>
-</a>
+        <button
+          onClick={scrollToForm}
+          className="mt-8 bg-white text-black px-6 py-3 rounded-xl font-semibold"
+        >
+          Start Free Audit
+        </button>
       </section>
 
       <Features />
 
-     <div id="audit-form">
-  <SpendForm />
-</div>
+      <div id="audit-form">
+        <SpendForm />
+      </div>
     </main>
   );
 }
