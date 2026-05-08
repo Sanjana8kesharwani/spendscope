@@ -16,13 +16,7 @@ import SavingsHero from "@/components/audit/SavingsHero";
 
 import { supabase } from "@/lib/supabase";
 
-const tools = [
-  "ChatGPT",
-  "Claude",
-  "Cursor",
-  "GitHub Copilot",
-  "Gemini",
-];
+const tools = ["ChatGPT", "Claude", "Cursor", "GitHub Copilot", "Gemini"];
 
 interface ToolData {
   id: number;
@@ -37,27 +31,24 @@ export default function SpendForm() {
   const router = useRouter();
 
   // Hydration-safe state
-  const [hydrated, setHydrated] =
-    useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   // Tool State
-  const [toolsData, setToolsData] =
-    useState<ToolData[]>([
-      {
-        id: 1,
-        tool: "",
-        plan: "",
-        monthlySpend: 0,
-        teamSize: 1,
-        useCase: "Coding",
-      },
-    ]);
+  const [toolsData, setToolsData] = useState<ToolData[]>([
+    {
+      id: 1,
+      tool: "",
+      plan: "",
+      monthlySpend: 0,
+      teamSize: 1,
+      useCase: "Coding",
+    },
+  ]);
 
   // Load localStorage AFTER hydration
   useEffect(() => {
     setTimeout(() => {
-      const savedData =
-        localStorage.getItem("audit-tools");
+      const savedData = localStorage.getItem("audit-tools");
 
       if (savedData) {
         setToolsData(JSON.parse(savedData));
@@ -70,16 +61,12 @@ export default function SpendForm() {
   // Save data
   useEffect(() => {
     if (hydrated) {
-      localStorage.setItem(
-        "audit-tools",
-        JSON.stringify(toolsData)
-      );
+      localStorage.setItem("audit-tools", JSON.stringify(toolsData));
     }
   }, [toolsData, hydrated]);
 
   // Audit Results
-  const [auditResults, setAuditResults] =
-    useState<AuditResultType[]>([]);
+  const [auditResults, setAuditResults] = useState<AuditResultType[]>([]);
 
   // Error State
   const [error, setError] = useState("");
@@ -104,13 +91,11 @@ export default function SpendForm() {
 
   // Generate Audit
   const handleGenerateAudit = async () => {
-    const incompleteTool = toolsData.some(
-      (item) => !item.tool || !item.plan
-    );
+    const incompleteTool = toolsData.some((item) => !item.tool || !item.plan);
 
     if (incompleteTool) {
       setError(
-        "Please complete all tool selections before generating an audit."
+        "Please complete all tool selections before generating an audit.",
       );
 
       return;
@@ -123,9 +108,10 @@ export default function SpendForm() {
       .map((item) => {
         const currentPrice =
           (
-            pricingData[
-              item.tool as keyof typeof pricingData
-            ].plans as Record<string, number>
+            pricingData[item.tool as keyof typeof pricingData].plans as Record<
+              string,
+              number
+            >
           )[item.plan] || 0;
 
         return generateAudit({
@@ -138,78 +124,58 @@ export default function SpendForm() {
 
     setAuditResults(results);
 
-    const generatedSummary =
-      generateSummary(results);
+    const generatedSummary = generateSummary(results);
 
     setSummary(generatedSummary);
 
-    const totalMonthlySavings =
-      results.reduce(
-        (sum, item) =>
-          sum + item.monthlySavings,
-        0
-      );
+    const totalMonthlySavings = results.reduce(
+      (sum, item) => sum + item.monthlySavings,
+      0,
+    );
 
-    const totalYearlySavings =
-      results.reduce(
-        (sum, item) =>
-          sum + item.yearlySavings,
-        0
-      );
+    const totalYearlySavings = results.reduce(
+      (sum, item) => sum + item.yearlySavings,
+      0,
+    );
 
     try {
-      const { data, error } =
-        await supabase
-          .from("audits")
-          .insert({
-            tools: toolsData,
-            summary: generatedSummary,
-            monthly_savings:
-              totalMonthlySavings,
-            yearly_savings:
-              totalYearlySavings,
-          })
-          .select()
-          .single();
+      const { data, error } = await supabase
+        .from("audits")
+        .insert({
+          tools: toolsData,
+          summary: generatedSummary,
+          monthly_savings: totalMonthlySavings,
+          yearly_savings: totalYearlySavings,
+        })
+        .select()
+        .single();
 
       if (error) {
-        console.error(
-          "Supabase save error:",
-          error
-        );
+        console.log(error);
+
+        alert(JSON.stringify(error));
 
         return;
       }
 
-      console.log(
-        "Audit saved successfully"
-      );
+      console.log("Audit saved successfully");
 
-      router.push(
-        `/audit/${data.id}`
-      );
+      router.push(`/audit/${data.id}`);
     } catch (error) {
-      console.log(
-        "Unexpected error",
-        error
-      );
+      console.log("Unexpected error", error);
     }
   };
 
   // Total Savings
-  const totalMonthlySavings =
-    auditResults.reduce(
-      (sum, item) =>
-        sum + item.monthlySavings,
-      0
-    );
+  const totalMonthlySavings = auditResults.reduce(
+    (sum, item) => sum + item.monthlySavings,
+    0,
+  );
 
-  const totalYearlySavings =
-    auditResults.reduce(
-      (sum, item) =>
-        sum + item.yearlySavings,
-      0
-    );
+  const totalYearlySavings = auditResults.reduce(
+    (sum, item) => sum + item.yearlySavings,
+    0,
+  );
 
   // Prevent hydration mismatch
   if (!hydrated) {
@@ -234,13 +200,8 @@ export default function SpendForm() {
               const currentPrice =
                 item.tool && item.plan
                   ? (
-                      pricingData[
-                        item.tool as keyof typeof pricingData
-                      ]
-                        .plans as Record<
-                        string,
-                        number
-                      >
+                      pricingData[item.tool as keyof typeof pricingData]
+                        .plans as Record<string, number>
                     )[item.plan]
                   : "";
 
@@ -257,11 +218,9 @@ export default function SpendForm() {
                     {toolsData.length > 1 && (
                       <button
                         onClick={() => {
-                          const updated =
-                            toolsData.filter(
-                              (_, i) =>
-                                i !== index
-                            );
+                          const updated = toolsData.filter(
+                            (_, i) => i !== index,
+                          );
 
                           setToolsData(updated);
                         }}
@@ -275,36 +234,25 @@ export default function SpendForm() {
                   <div className="grid md:grid-cols-2 gap-6">
                     {/* Tool */}
                     <div>
-                      <label className="text-sm text-gray-300">
-                        AI Tool
-                      </label>
+                      <label className="text-sm text-gray-300">AI Tool</label>
 
                       <select
                         value={item.tool}
                         onChange={(e) => {
-                          const updated = [
-                            ...toolsData,
-                          ];
+                          const updated = [...toolsData];
 
-                          updated[index].tool =
-                            e.target.value;
+                          updated[index].tool = e.target.value;
 
-                          updated[index].plan =
-                            "";
+                          updated[index].plan = "";
 
                           setToolsData(updated);
                         }}
                         className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
                       >
-                        <option value="">
-                          Select Tool
-                        </option>
+                        <option value="">Select Tool</option>
 
                         {tools.map((tool) => (
-                          <option
-                            key={tool}
-                            value={tool}
-                          >
+                          <option key={tool} value={tool}>
                             {tool}
                           </option>
                         ))}
@@ -327,38 +275,27 @@ export default function SpendForm() {
 
                     {/* Plan */}
                     <div>
-                      <label className="text-sm text-gray-300">
-                        Plan
-                      </label>
+                      <label className="text-sm text-gray-300">Plan</label>
 
                       <select
                         value={item.plan}
                         onChange={(e) => {
-                          const updated = [
-                            ...toolsData,
-                          ];
+                          const updated = [...toolsData];
 
-                          updated[index].plan =
-                            e.target.value;
+                          updated[index].plan = e.target.value;
 
                           setToolsData(updated);
                         }}
                         className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
                       >
-                        <option value="">
-                          Select Plan
-                        </option>
+                        <option value="">Select Plan</option>
 
                         {item.tool &&
                           Object.keys(
-                            pricingData[
-                              item.tool as keyof typeof pricingData
-                            ].plans
+                            pricingData[item.tool as keyof typeof pricingData]
+                              .plans,
                           ).map((plan) => (
-                            <option
-                              key={plan}
-                              value={plan}
-                            >
+                            <option key={plan} value={plan}>
                               {plan}
                             </option>
                           ))}
@@ -374,53 +311,33 @@ export default function SpendForm() {
                       <select
                         value={item.useCase}
                         onChange={(e) => {
-                          const updated = [
-                            ...toolsData,
-                          ];
+                          const updated = [...toolsData];
 
-                          updated[index].useCase =
-                            e.target.value;
+                          updated[index].useCase = e.target.value;
 
                           setToolsData(updated);
                         }}
                         className="w-full mt-2 bg-black border border-white/10 rounded-xl px-4 py-3"
                       >
-                        <option>
-                          Coding
-                        </option>
-                        <option>
-                          Writing
-                        </option>
-                        <option>
-                          Research
-                        </option>
-                        <option>
-                          Data
-                        </option>
-                        <option>
-                          Mixed
-                        </option>
+                        <option>Coding</option>
+                        <option>Writing</option>
+                        <option>Research</option>
+                        <option>Data</option>
+                        <option>Mixed</option>
                       </select>
                     </div>
 
                     {/* Team Size */}
                     <div className="md:col-span-2">
-                      <label className="text-sm text-gray-300">
-                        Team Size
-                      </label>
+                      <label className="text-sm text-gray-300">Team Size</label>
 
                       <input
                         type="number"
                         value={item.teamSize}
                         onChange={(e) => {
-                          const updated = [
-                            ...toolsData,
-                          ];
+                          const updated = [...toolsData];
 
-                          updated[index].teamSize =
-                            Number(
-                              e.target.value
-                            );
+                          updated[index].teamSize = Number(e.target.value);
 
                           setToolsData(updated);
                         }}
@@ -460,21 +377,15 @@ export default function SpendForm() {
         {/* Savings Hero */}
         {auditResults.length > 0 && (
           <SavingsHero
-            monthlySavings={
-              totalMonthlySavings
-            }
-            yearlySavings={
-              totalYearlySavings
-            }
+            monthlySavings={totalMonthlySavings}
+            yearlySavings={totalYearlySavings}
           />
         )}
 
         {/* AI Summary */}
         {summary && (
           <div className="mt-6 bg-zinc-900 border border-white/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white">
-              AI Summary
-            </h2>
+            <h2 className="text-2xl font-bold text-white">AI Summary</h2>
 
             <p className="mt-4 text-gray-300 leading-8 whitespace-pre-line">
               {summary}
@@ -485,14 +396,9 @@ export default function SpendForm() {
         {/* Audit Results */}
         {auditResults.length > 0 && (
           <div className="space-y-6 mt-6">
-            {auditResults.map(
-              (result, index) => (
-                <AuditResult
-                  key={index}
-                  result={result}
-                />
-              )
-            )}
+            {auditResults.map((result, index) => (
+              <AuditResult key={index} result={result} />
+            ))}
           </div>
         )}
       </div>
