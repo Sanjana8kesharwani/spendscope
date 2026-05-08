@@ -16,14 +16,18 @@ export default function Home() {
           Audit your AI stack instantly and discover hidden monthly savings.
         </p>
 
-        <button className="mt-8 bg-white text-black px-6 py-3 rounded-xl font-semibold">
-          Start Free Audit
-        </button>
+        <a href="#audit-form">
+  <button className="mt-8 bg-white text-black px-6 py-3 rounded-xl font-semibold">
+    Start Free Audit
+  </button>
+</a>
       </section>
 
       <Features />
 
-      <SpendForm />
+     <div id="audit-form">
+  <SpendForm />
+</div>
     </main>
   );
 }
